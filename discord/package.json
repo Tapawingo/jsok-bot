@@ -1,0 +1,25 @@
+{
+  "name": "jsok-bot",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "deploy:commands": "tsx src/deployCommands.ts",
+    "start": "node dist/index.js",
+    "build": "tsup src/index.ts --minify"
+  },
+  "author": "Eric",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@types/node-persist": "^3.1.8",
+    "discord.js": "^14.16.3",
+    "dotenv": "^16.4.5",
+    "node-persist": "^4.0.3"
+  },
+  "devDependencies": {
+    "tsup": "^8.3.4",
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.3"
+  }
+}
