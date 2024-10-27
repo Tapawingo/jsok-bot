@@ -24,7 +24,7 @@ module.exports = {
             if (!guildConfig.event) guildConfig.event = {};
             if (!guildConfig.event.events) guildConfig.event.events = [];
 
-            await interaction.editReply({ content: createList(guild, guildConfig.event.events) });
+            const message = await interaction.editReply({ content: createList(guild, guildConfig.event.events), embeds: [] });
         } catch (e: any) {
             console.error(e, 'BOT');
             await interaction.editReply({ content: 'Something went wrong.' });
@@ -32,7 +32,9 @@ module.exports = {
 	},
 };
 
-const createList = (guild: Guild, events: any[]) => {    
+const createList = (guild: Guild, events: any[]) => {
+    if (events.length <= 0) return 'No events';
+
     let roleStrings: string[] = [];
     events.forEach(event => {
         roleStrings.push(`**${ event.name }** • ${ event.description }`);

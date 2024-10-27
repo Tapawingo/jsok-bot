@@ -29,18 +29,21 @@ module.exports = {
             let guildConfig = (await storage.getItem(guild.id)) ?? {};
             if (!guildConfig.event) guildConfig.event = {};
             if (!guildConfig.event.events) guildConfig.event.events = [];
+            if (!guildConfig.event.archived_events) guildConfig.event.archived_events = [];
 
             const event = guildConfig.event.events[eventIndex - 1];
+            guildConfig.event.archived_events.push(event);
+
             guildConfig.event.events.splice(eventIndex - 1, 1);
 
             const channel = guild.channels.cache.get(event.channel) as TextChannel;
             const archivedCategory = guild.channels.cache.get(guildConfig.event.archivedCategory);
             if (channel && archivedCategory && archivedCategory.type === ChannelType.GuildCategory) {
                 channel.setParent(archivedCategory)
-                
-                if (channel.isSendable()) {
-                    channel.send(`⠀\n# EVENT ARCHIVED\n⠀`);
-                }
+            }
+
+            if (channel?.isSendable()) {
+                channel.send(`⠀\n# EVENT ARCHIVED\n⠀`);
             }
 
             const schedule = guild.scheduledEvents.cache.get(event.schedule);

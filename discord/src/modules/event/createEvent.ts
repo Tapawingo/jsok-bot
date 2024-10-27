@@ -1,4 +1,4 @@
-import { ChannelType, Client, Events, GuildScheduledEventEntityType, GuildScheduledEventPrivacyLevel } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, Client, Events, GuildChannel, GuildScheduledEventEntityType, GuildScheduledEventPrivacyLevel, TextChannel } from "discord.js";
 import storage from 'node-persist';
 import cuuid from '../../utils/createId';
 
@@ -54,7 +54,7 @@ export default (client: Client) => {
         if (!guildConfig.event) guildConfig.event = {};
         if (!guildConfig.event.events) guildConfig.event.events = [];
 
-        const finalName = eventName /* + (eventStart ? '-' + getDate(eventStart).getFullYear() : '') */;
+        const finalName = eventName.replace(' ', '-') /* + (eventStart ? '-' + getDate(eventStart).getFullYear() : '') */;
 
         let channel = guild.channels.cache.find(channel => channel.name.toLowerCase() === finalName.toLowerCase());
         if (!channel) {
@@ -94,20 +94,25 @@ export default (client: Client) => {
             })
         }
 
-        const role = await guild.roles.create({
-            name: `${ eventName } Attendee`,
-            color: Math.floor(Math.random()*16777215),
-            mentionable: true,
-            position: guild.roles.highest.position
-        })
+        let role;
+        try {
+            role = await guild.roles.create({
+                name: `${ eventName } Attendee`,
+                color: Math.floor(Math.random()*16777215),
+                mentionable: true,
+                position: guild.roles.highest.position
+            })
+        } catch (e: any) {
+            console.warn(e);
+        }
 
         const event = {
             id: cuuid(),
             name: eventName,
             description: eventDescription,
             channel: channel.id,
-            schedule: schedule ? schedule.id : null,
-            role: role.id
+            schedule: schedule?.id,
+            role: role?.id
         };
 
         guildConfig.event.events.push(event);
@@ -119,14 +124,32 @@ export default (client: Client) => {
             const message = await interaction.channel.send({ content: `# New Event "${ eventName }"![⠀](${ schedule.url })\n ${ channel }` })
             message.suppressEmbeds(true);
         } else if (interaction.channel?.isSendable()) {
-            await interaction.channel.send(`# New Event!\n ${ channel }`)
+            createUnscheduledEvent(interaction.channel as TextChannel, channel as TextChannel);
         }
 
         if (channel.isSendable() && schedule) {
             const message = await channel.send({ content: `# New Event "${ eventName }"![⠀](${ schedule.url })\n ${ channel }` })
             message.suppressEmbeds(true);
-        } else if (interaction.channel?.isSendable()) {
-            await interaction.channel.send(`# New Event!\n ${ channel }`)
+        } else if (channel.isSendable()) {
+            await channel.send(`# New Event!\n ${ channel }`);
+            createUnscheduledEvent(channel as TextChannel, channel as TextChannel);
         }
     });
+}
+
+const createUnscheduledEvent = async (channel: TextChannel, eventChannel: TextChannel) => {
+    const uninterestedButton = new ButtonBuilder()
+        .setCustomId(`unscheduled_event_unsubscribe`)
+        .setLabel('Unsubscribe')
+        .setStyle(ButtonStyle.Secondary);
+
+    const interestedButton = new ButtonBuilder()
+        .setCustomId('unscheduled_event_subscribe')
+        .setLabel('Subscribe')
+        .setStyle(ButtonStyle.Primary);
+    
+    const row = new ActionRowBuilder()
+        .addComponents(uninterestedButton, interestedButton);
+
+    await channel.send({ content: `# New Event!\n ${ eventChannel }`, components: [row as any] });
 }

@@ -15,7 +15,8 @@ const intents = [
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
     GatewayIntentBits.GuildVoiceStates,
-    GatewayIntentBits.GuildScheduledEvents
+    GatewayIntentBits.GuildScheduledEvents,
+    GatewayIntentBits.GuildPresences
 ];
 
 const client = new Client({ intents: intents });
@@ -114,15 +115,15 @@ if (config.bot.command_prefix) {
 }
 
 /* Handle errors */
-client.on(Events.Error, e => {
+/* client.on(Events.Error, e => {
     console.error(e, 'DISCORDJS');
-});
+}); */
 
-if (parseInt(env.IGNORE_UNCAUGHT ?? '1') == 1) {
+/* if (parseInt(env.IGNORE_UNCAUGHT ?? '1') == 1) {
     process.on('uncaughtException', (e) => {
         console.error(e, 'UNCAUGHT');
     });
-}
+} */
 
 client.on(Events.Debug, d => {
     console.debug(d, 'DISCORDJS');
