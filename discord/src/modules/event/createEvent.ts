@@ -1,6 +1,6 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, Client, Events, GuildChannel, GuildScheduledEventEntityType, GuildScheduledEventPrivacyLevel, TextChannel } from "discord.js";
 import storage from 'node-persist';
-import cuuid from '../../utils/createId';
+import snowflake from '../../utils/createId';
 
 const getDate = (dateString: string): Date => {
     if (!/^\d{1,2}-\d{1,2}-\d{2,4} \d{1,2}:\d{1,2}$/.test(dateString)) {
@@ -64,7 +64,7 @@ export default (client: Client) => {
                     type: ChannelType.GuildText
                 });
 
-                channel.setTopic(eventDescription);
+                channel.setTopic(eventDescription ?? '');
 
                 const eventCategory = guild.channels.cache.get(guildConfig.event.eventCategory);
                 if (eventCategory && eventCategory.type === ChannelType.GuildCategory) {
@@ -90,7 +90,7 @@ export default (client: Client) => {
                 },
                 privacyLevel: GuildScheduledEventPrivacyLevel.GuildOnly,
                 entityType: GuildScheduledEventEntityType.External,
-                description: eventDescription
+                description: eventDescription ?? 'N/A'
             })
         }
 
@@ -107,9 +107,9 @@ export default (client: Client) => {
         }
 
         const event = {
-            id: cuuid(),
+            id: snowflake(),
             name: eventName,
-            description: eventDescription,
+            description: eventDescription ?? '',
             channel: channel.id,
             schedule: schedule?.id,
             role: role?.id
@@ -124,7 +124,7 @@ export default (client: Client) => {
             const message = await interaction.channel.send({ content: `# New Event "${ eventName }"![⠀](${ schedule.url })\n ${ channel }` })
             message.suppressEmbeds(true);
         } else if (interaction.channel?.isSendable()) {
-            createUnscheduledEvent(interaction.channel as TextChannel, channel as TextChannel);
+            createUnscheduledEvent(interaction.channel as TextChannel, channel as TextChannel, event);
         }
 
         if (channel.isSendable() && schedule) {
@@ -132,19 +132,19 @@ export default (client: Client) => {
             message.suppressEmbeds(true);
         } else if (channel.isSendable()) {
             await channel.send(`# New Event!\n ${ channel }`);
-            createUnscheduledEvent(channel as TextChannel, channel as TextChannel);
+            createUnscheduledEvent(channel as TextChannel, channel as TextChannel, event);
         }
     });
 }
 
-const createUnscheduledEvent = async (channel: TextChannel, eventChannel: TextChannel) => {
+const createUnscheduledEvent = async (channel: TextChannel, eventChannel: TextChannel, event: any) => {
     const uninterestedButton = new ButtonBuilder()
-        .setCustomId(`unscheduled_event_unsubscribe`)
+        .setCustomId(`event_unsubscribe:${ event.id }`)
         .setLabel('Unsubscribe')
         .setStyle(ButtonStyle.Secondary);
 
     const interestedButton = new ButtonBuilder()
-        .setCustomId('unscheduled_event_subscribe')
+        .setCustomId(`event_subscribe:${ event.id }`)
         .setLabel('Subscribe')
         .setStyle(ButtonStyle.Primary);
     

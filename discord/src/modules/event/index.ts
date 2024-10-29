@@ -47,11 +47,12 @@ module.exports = async (client: Client) => {
     });
 
     client.on(Events.InteractionCreate, async (interaction) => {
-        if (!interaction.isMessageComponent() || interaction.customId !== 'unscheduled_event_subscribe') return;
+        if (!interaction.isMessageComponent() || !interaction.customId.startsWith('event_subscribe')) return;
         await interaction.deferReply({ ephemeral: true });
+        console.debug(interaction.customId);
 
         const guild = interaction.guild;
-        const channel = interaction.channel;
+        const eventId = interaction.customId.split(':')[1];
         if (!guild) {
             console.warn('No guild for interaction');
             await interaction.editReply(`Missing guild`);
@@ -64,11 +65,17 @@ module.exports = async (client: Client) => {
             return;
         }
 
+        if (!eventId) {
+            console.warn('Missing event ID');
+            await interaction.editReply(`Missing event ID`);
+            return;
+        }
+
         let guildConfig = (await storage.getItem(guild.id)) ?? {};
         if (!guildConfig.event) guildConfig.event = {};
         if (!guildConfig.event.events) guildConfig.event.events = [];
 
-        const event = guildConfig.event.events.find((event: any) => event.channel === channel?.id);
+        const event = guildConfig.event.events.find((event: any) => event.id === eventId);
         if (!event) return;
 
         const role = event.role;
@@ -77,11 +84,12 @@ module.exports = async (client: Client) => {
     });
 
     client.on(Events.InteractionCreate, async (interaction) => {
-        if (!interaction.isMessageComponent() || interaction.customId !== 'unscheduled_event_unsubscribe') return;
+        if (!interaction.isMessageComponent() || !interaction.customId.startsWith('event_unsubscribe')) return;
         await interaction.deferReply({ ephemeral: true });
+        console.debug(interaction.customId);
 
         const guild = interaction.guild;
-        const channel = interaction.channel;
+        const eventId = interaction.customId.split(':')[1];
         if (!guild) {
             console.warn('No guild for interaction');
             await interaction.editReply(`Missing guild`);
@@ -94,11 +102,17 @@ module.exports = async (client: Client) => {
             return;
         }
 
+        if (!eventId) {
+            console.warn('Missing event ID');
+            await interaction.editReply(`Missing event ID`);
+            return;
+        }
+
         let guildConfig = (await storage.getItem(guild.id)) ?? {};
         if (!guildConfig.event) guildConfig.event = {};
         if (!guildConfig.event.events) guildConfig.event.events = [];
 
-        const event = guildConfig.event.events.find((event: any) => event.channel === channel?.id);
+        const event = guildConfig.event.events.find((event: any) => event.id === eventId);
         if (!event) return;
 
         const role = event.role;

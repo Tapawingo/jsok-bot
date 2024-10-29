@@ -1,10 +1,14 @@
 import path from 'path';
 import fs from 'fs';
 import { Client, Events, GatewayIntentBits, Collection } from 'discord.js';
-import { config, env } from "./config";
+import { config } from "./config";
+import handleWeb from './web/app';
 
 import './utils/console';
 import parseCommand from './utils/parseCommand';
+
+import snowflake from './utils/createId';
+console.log(snowflake());
 
 const initStartTime = performance.now();
 console.info(`Initializing Bot...`, 'BOT');
@@ -67,6 +71,8 @@ client.once(Events.ClientReady, () => {
 
     const initEndTime = performance.now();
     console.info(`Bot fully initialized! (${ (initEndTime - initStartTime).toFixed(2) }ms)`, 'BOT');
+
+    handleWeb(client);
 });
 
 /* Handle interactions */

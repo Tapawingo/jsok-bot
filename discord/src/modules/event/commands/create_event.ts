@@ -34,14 +34,14 @@ const createModal = () => {
         .setLabel('Event Description')
         .setPlaceholder('Description')
         .setStyle(TextInputStyle.Paragraph)
-        .setRequired(true)
+        .setRequired(false)
 
     const eventLocationInput = new TextInputBuilder()
         .setCustomId('location')
         .setLabel('Event Location')
         .setPlaceholder('Location')
         .setStyle(TextInputStyle.Short)
-        .setRequired(true)
+        .setRequired(false)
 
     const eventStartInput = new TextInputBuilder()
         .setCustomId('start')

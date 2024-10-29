@@ -37,7 +37,7 @@ const createList = (guild: Guild, events: any[]) => {
 
     let roleStrings: string[] = [];
     events.forEach(event => {
-        roleStrings.push(`**${ event.name }** • ${ event.description }`);
+        roleStrings.push(` \`${ event.id }\` **${ event.name }**`);
     });
 
     const list = orderedList(roleStrings);

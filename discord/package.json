@@ -6,19 +6,24 @@
     "dev": "tsx watch src/index.ts",
     "deploy:commands": "tsx src/deployCommands.ts",
     "start": "node dist/index.js",
-    "start:tsk": "tsx src/index.ts",
+    "start:tsx": "tsx src/index.ts",
     "build": "tsup src/index.ts --minify"
   },
   "author": "Eric",
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@akashrajpurohit/snowflake-id": "^2.0.0",
     "@types/node-persist": "^3.1.8",
+    "body-parser": "^1.20.3",
     "discord.js": "^14.16.3",
     "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "express-handlebars": "^8.0.1",
     "node-persist": "^4.0.3"
   },
   "devDependencies": {
+    "@types/express": "^5.0.0",
     "tsup": "^8.3.4",
     "tsx": "^4.19.1",
     "typescript": "^5.6.3"

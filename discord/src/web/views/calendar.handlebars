@@ -1,0 +1,110 @@
+<h1 id="main-header"></h1>
+<div id='calendar'></div>
+
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
+
+<script>
+    const mainHeaderEl = document.getElementById('main-header');
+    const EventDataEl = document.getElementById('eventObj');
+    const event = {{{ event }}};
+    const guild = {{{ guild }}};
+    const user = {{{ user }}};
+
+    // Function to capitalize first letter in string
+    function capitalize(val) {
+        return String(val).charAt(0).toUpperCase() + String(val).slice(1);
+    }
+
+    // Function to inject css
+    function addStyle(styleString) {
+        const style = document.createElement('style');
+        style.textContent = styleString;
+        document.head.append(style);
+    }
+
+    addStyle(`
+        .fc-header-toolbar > .fc-toolbar-chunk:nth-child(2)::before {
+            content: '${ capitalize(event.name) } - Meeting Availability';
+        }
+    `)
+
+    function isMobile() {
+        const minWidth = 768; // Minimum width for desktop devices
+        return window.innerWidth < minWidth || screen.width < minWidth;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('calendar');
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: isMobile() ? 'timeGridDay' : 'timeGridWeek',
+            selectable: true,
+            firstDay: 1,
+            dayHeaderFormat: { weekday: 'long', month: 'short', day: 'numeric' },
+            height: window.innerHeight - 30,
+            allDaySlot: false,
+            selectOverlap: false,
+            expandRows: true,
+            headerToolbar: {
+                start: 'prev',
+                center: '',
+                end: 'next'
+            },
+            footerToolbar: {
+                left: '',
+                center: '',
+                right: 'submit'
+            },
+            select: (info) => {
+                calendar.addEvent({
+                    id: Math.random().toString(16).slice(2), // small posibility of collision
+                    title: '',
+                    start: info.start,
+                    end: info.end,
+                    display: 'background'
+                })
+            },
+            eventClick: (info) => {
+                const event = calendar.getEventById(info.event.id);
+                info.event.remove();
+            },
+            customButtons: {
+                cancel: {
+                    text: 'Cancel',
+                    click: function() {
+                        console.log('no way to close tab, useless');
+                    }
+                },
+                submit: {
+                    text: 'Submit',
+                    click: function() {
+                        const allEvents = calendar.getEvents();
+                        fetch('/api/submitAvailability', {
+                            method: 'POST',
+                            body: JSON.stringify({
+                                guild: guild,
+                                user: user,
+                                event: event
+                            }),
+                            headers: {
+                                'Content-type': 'application/json; charset=UTF-8'
+                            }
+                        })
+                        .then((response) => response.json())
+                        .then((json) => console.log(json));
+                    }
+                }
+            }
+        });
+
+        calendar.render();
+
+        $(window).resize(function() {
+            if (isMobile()) {
+                calendar.initialView = 'timeGridDay';
+            }
+            else {
+                calendar.initialView = 'timeGridWeek';
+            }
+        });
+    });
+</script>
